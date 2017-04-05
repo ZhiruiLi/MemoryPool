@@ -18,8 +18,8 @@ namespace mm {
         ~MemoryPool();
         MemoryPool(const MemoryPool&) = delete;
         auto operator=(const MemoryPool&) = delete;
-        void* malloc(size_type size);
-        void free(void* ptr);
+        auto malloc(size_type size) -> void*;
+        auto free(void* ptr) -> void;
 
     private:
         class RowMemoryHandler {
@@ -28,15 +28,15 @@ namespace mm {
             ~RowMemoryHandler();
             RowMemoryHandler(const RowMemoryHandler&) = delete;
             auto operator=(const RowMemoryHandler&) = delete;
-            void* sbrk(int incr);
+            auto sbrk(int incr) -> void*;
         private:
             byte* const pool_;
             byte* const maxAddr_;
             byte* brk_;
         };
-        void* findFirstFit(size_type size);
-        void* splitAndPlace(void *blockPtr, size_type size);
-        void* extendPool(size_type words);
+        auto findFirstFit(size_type size) -> void*;
+        auto splitAndPlace(void *blockPtr, size_type size) -> void*;
+        auto extendPool(size_type words) -> void*;
         void* poolHead_ = nullptr;
         RowMemoryHandler handler_;
     };

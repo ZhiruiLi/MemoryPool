@@ -8,16 +8,16 @@
 
 using namespace std;
 
-void test1() {
+auto test1() {
     mm::MemoryPool pool(4 * 4 + 16 + 2 * 4);
-    void* p1 = nullptr;
+    auto p1 = static_cast<void*>(nullptr);
     p1 = pool.malloc(32);
     assert(p1 == nullptr);
     p1 = pool.malloc(17);
     assert(p1 == nullptr);
     p1 = pool.malloc(16);
     assert(p1 != nullptr);
-    void* p2 = nullptr;
+    auto p2 = static_cast<void*>(nullptr);
     p2 = pool.malloc(1);
     assert(p2 == nullptr);
     pool.free(p1);
@@ -27,10 +27,10 @@ void test1() {
     pool.free(p2);
 }
 
-void test2() {
+auto test2() {
     mm::MemoryPool pool(4 * 4 + (16 + 2 * 4) * 2);
-    void* p1 = nullptr;
-    void* p2 = nullptr;
+    auto p1 = static_cast<void*>(nullptr);
+    auto p2 = static_cast<void*>(nullptr);
     p1 = pool.malloc(41);
     assert(p1 == nullptr);
     p1 = pool.malloc(40);
@@ -53,7 +53,7 @@ void test2() {
     pool.free(p2);
 }
 
-void test3() {
+auto test3() {
     try {
         mm::MemoryPool pool(1);
         assert(false);
@@ -62,7 +62,7 @@ void test3() {
     }
 }
 
-int main() {
+auto main() -> int {
     test1();
     test2();
     test3();

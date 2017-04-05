@@ -18,53 +18,53 @@ namespace mm {
         static constexpr size_type wsize = 4;
         static constexpr size_type dwsize = 2 * wsize;
 
-        byte* castByteP(void* ptr) {
+        auto castByteP(void* ptr) -> byte* {
             return static_cast<byte*>(ptr);
         }
 
-        word* castWordP(void* ptr) {
+        auto castWordP(void* ptr) -> word* {
             return static_cast<word*>(ptr);
         }
 
-        word& getWordAt(void* ptr) {
+        auto getWordAt(void* ptr) -> word& {
             return *castWordP(ptr);
         }
 
-        void putWordAt(void* ptr, const size_type wd) {
+        auto putWordAt(void* ptr, const size_type wd) {
             getWordAt(ptr) = wd;
         }
 
-        word pack(const word size, const word allocBits) {
+        auto pack(const word size, const word allocBits) -> word {
             return size | allocBits;
         }
 
-        size_type getSize(void* headPtr) {
+        auto getSize(void* headPtr) -> size_type {
             return static_cast<size_type>(*castWordP(headPtr) & static_cast<word>(~0x7));
         }
 
-        bool getAllocBit(void* headPtr) {
+        auto getAllocBit(void* headPtr) -> bool {
             return (*castWordP(headPtr) & static_cast<word>(0x1)) != 0;
         }
 
-        void* getHeadAddr(void* blockPtr) {
+        auto getHeadAddr(void* blockPtr) -> void* {
             return castByteP(blockPtr) - wsize;
         }
 
-        void* getFootAddr(void* blockPtr) {
+        auto getFootAddr(void* blockPtr) -> void* {
             return castByteP(blockPtr) - wsize
                    + getSize(getHeadAddr(blockPtr)) - wsize;
         }
 
-        void* getNextBlock(void* blockPtr) {
+        auto getNextBlock(void* blockPtr) -> void* {
             return castByteP(blockPtr) + getSize(getHeadAddr(blockPtr));
         }
 
-        void* getPrevBlock(void* blockPtr) {
+        auto getPrevBlock(void* blockPtr) -> void* {
             auto prevFoot = castByteP(blockPtr) - dwsize;
             return castByteP(blockPtr) - getSize(prevFoot);
         }
 
-        void* mergeFreeBlocks(void* blockPtr) {
+        auto mergeFreeBlocks(void* blockPtr) -> void* {
             const auto prevBlock = getPrevBlock(blockPtr);
             const auto nextBlock = getNextBlock(blockPtr);
             const auto prevAlloc = getAllocBit(getHeadAddr(prevBlock));
@@ -107,7 +107,7 @@ namespace mm {
         std::free(pool_);
     }
 
-    void* MemoryPool::RowMemoryHandler::sbrk(int incr) {
+    auto MemoryPool::RowMemoryHandler::sbrk(int incr) -> void* {
         auto oldBrk = brk_;
         if ((incr < 0) || ((brk_ + incr) > maxAddr_)) {
             return nullptr;
@@ -134,7 +134,7 @@ namespace mm {
 
     MemoryPool::~MemoryPool() { }
 
-    void* MemoryPool::malloc(size_type size) {
+    auto MemoryPool::malloc(size_type size) -> void* {
         using namespace detail;
         if (size == 0) {
             return nullptr;
@@ -153,7 +153,7 @@ namespace mm {
         return splitAndPlace(bp, needSz);
     }
 
-    void* MemoryPool::findFirstFit(MemoryPool::size_type size) {
+    auto MemoryPool::findFirstFit(MemoryPool::size_type size) -> void* {
         using namespace detail;
         const auto top = handler_.sbrk(0);
         for (auto ptr = poolHead_; ptr < top; ) {
@@ -165,7 +165,7 @@ namespace mm {
         return nullptr;
     }
 
-    void* MemoryPool::splitAndPlace(void* blockPtr, MemoryPool::size_type needSize) {
+    auto MemoryPool::splitAndPlace(void* blockPtr, MemoryPool::size_type needSize) -> void* {
         using namespace detail;
         const auto totalSize = getSize(getHeadAddr(blockPtr));
         assert(needSize % dwsize == 0);
@@ -185,7 +185,7 @@ namespace mm {
         return blockPtr;
     }
 
-    void MemoryPool::free(void* ptr) {
+    auto MemoryPool::free(void* ptr) -> void {
         if (ptr == nullptr) { return; }
         using namespace detail;
         const auto size = getSize(getHeadAddr(ptr));
@@ -194,7 +194,7 @@ namespace mm {
         mergeFreeBlocks(ptr);
     }
 
-    void* MemoryPool::extendPool(MemoryPool::size_type words) {
+    auto MemoryPool::extendPool(MemoryPool::size_type words) -> void* {
         using namespace detail;
         size_type bytes = ((words % 2 == 0) ? words : (words + 1)) * wsize;
         byte* bp = castByteP(handler_.sbrk(bytes));
